@@ -1,0 +1,23 @@
+This is your step-by-step master plan to execute over the next few weeks to bring the platform to life:
+
+Week 1: Foundation & Account Setup
+Register a master developer account on Stripe and toggle on Stripe Connect so you can route split payments between your account and future yards.
+Sign up for an OpenAI Developer Console account and create a master API key for the gpt-4o-minimodel.
+Register an account on Twilio to secure a dedicated virtual mobile number for sending out the automated wishlist text messages.
+Open a developer account on eBay’s Developer Portal to clear access for the Inventory Sync API.
+
+Week 2: Core Engineering with Claude
+Hand over the Master Engine Blueprint to Claude to clean up your existing codebase.
+Have Claude restructure your code using environment variables (.env) so you can change logos, phone numbers, and design colors dynamically.
+Implement the Stripe split-fee transaction code into your checkout processing route to lock in your 3% to 5% commission.
+Code the 3-step mobile wizard for the yard worker upload dashboard.
+
+Week 3: Automation & Testing
+Wire the chatbot up to your active inventory database tables so it can accurately process "in-stock" requests.
+Build the database listener trigger for the wishlists table so that matches automatically fire text alerts via Twilio.
+Run 3 dummy transactions using Stripe’s test mode to confirm that payouts split perfectly to a fake yard account.
+
+Week 4: The Local Launch (Birmingham & Midlands)
+Select 2 or 3 local scrap yards in the Birmingham/Midlands area to target as your first pilot users.
+Walk into the yards physically or call the owners directly using the Value Pitch Matrix above.
+Offer them a highly discounted "Founding Partner" rate (£500 setup + £99/month) to secure your first real-world case studies and operational feedback loops.
