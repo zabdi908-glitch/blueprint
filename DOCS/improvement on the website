@@ -1,0 +1,36 @@
+Improvement on the website 
+🔴 Critical Security & Trust Issues
+Amateur Contact Email: Using a generic Hotmail or Gmail address destroys corporate trust. Switch to a domain-matching address like info@cherrywoodautoparts.co.uk.
+Missing Trust Anchors: Zero customer reviews or Trustpilot badges are displayed. Disgruntled or skeptical buyers will immediately leave the site.
+Faceless Business Model: No actual photos of your yard, team, or physical stock exist on the site. Stock images make the business look fake.
+
+🟡 Poor User Experience (UX) & Conversion Friction
+No Direct E-Commerce: Forcing users to call or email to buy parts creates massive friction. Implement an automated shopping cart and checkout system.
+High-Friction Quote System: The scrap car service relies on manual forms instead of an instant, automated valuation tool. Modern users expect an immediate price estimate.
+Vague Navigation: Product categories and inventory pages lack advanced filtering options. Users cannot quickly sort parts by vehicle make, model, or year.
+
+🔵 Technical & SEO Deficiencies
+Weak Search Discoverability: Metadata and headers lack hyper-local optimization. You are missing out on high-intent "scrap yard near me" search traffic.
+Performance Bottlenecks: Page speed and mobile performance are unoptimized. Slow load times hurt your Google search rankings and increase bounce rates.
+
+We need to refactor and optimize the user interface and inventory architecture for our auto parts e-commerce platform so we can scale it to multiple yards. 
+
+Right now, the inventory uploading and cataloging process is too complicated for a typical scrap yard worker who is not tech-savvy or good with computers. If the system is too hard to understand, they won't use it, which kills our user retention.
+
+Please modify our code to drastically simplify the worker dashboard and streamline the database structure based on these specifications:
+
+1. THE "DUMMY-PROOF" MOBILE UPLOAD DASHBOARD:
+- Redesign the part creation interface to look like a simple, step-by-step wizard optimized for a mobile phone screen. 
+- Eliminate dense forms. The worker should only have to complete 3 clear actions to list a part:
+  * Step 1: Tap a big button to open their phone camera, snap 2 or 3 quick photos, and upload them.
+  * Step 2: Input the Vehicle Registration Number (VRN) and select a Part Category from a clean, visual grid of large buttons (e.g., 'Engine', 'Gearbox', 'Door/Body', 'Lights').
+  * Step 3: Type in a Price and tap a giant green 'PUBLISH LIVE' button.
+
+2. UNDER-THE-HOOD AUTOMATION (Reducing Manual Typing):
+- Integrate logic where the system tries to look up or infer vehicle data (Make, Model, Year, Engine Code) based on the VRN using a placeholder or DVLA lookup API function, so the worker doesn't have to manually type out vehicle specifications.
+- Automatically generate a search-friendly title based on the data (e.g., "2018 Ford Fiesta 1.0L Petrol Alternator") so the user doesn't have to think about e-commerce SEO.
+
+3. SCALABLE ARCHITECTURE:
+- Ensure the database schema easily handles "Multi-Tenancy." Each scrap yard must have its own isolated inventory, orders, and Stripe payout configuration, but run off the exact same core codebase so we can deploy a new yard's store instantly.
+
+Please review our current dashboard, frontend layout, and inventory schemas. Show me the exact code updates needed to implement this hyper-simplified, step-by-step mobile inventory workflow.
