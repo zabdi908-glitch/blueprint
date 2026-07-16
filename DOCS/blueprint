@@ -1,0 +1,80 @@
+Act as an Elite Enterprise Solutions Architect and Principal Full-Stack Engineer. 
+
+Below is the exhaustive, production-grade technical specification for our Auto Parts E-Commerce Platform. This platform allows vehicle dismantlers and scrap yards to instantly list and sell salvage components online. We are refactoring our existing website codebase into a single, highly optimized Multi-Tenant Monorepo. 
+
+You must read, analyze, and build this architecture step-by-step. Do not cut corners, do not use dummy placeholders, and ensure every requirement is fully accounted for.
+
+---
+
+### CORE ARCHITECTURAL ENGINE
+
+#### 1. Multi-Tenant Monorepo Architecture & Git Strategy
+- Single Repository Rule: We are NOT creating separate GitHub repositories per client. The entire application must live in a single repository.
+- Dynamic Request Routing: The application must act as a multi-tenant engine. When a web request hits our server, the middleware must inspect the host header (e.g., `birminghamscrap.com` vs `tamworthsalvage.co.uk`) or the tenant URL slug.
+- Dynamic Configuration Injection: Based on the resolved Tenant ID, the system must dynamically pull from a master `tenants` configuration matrix. It must inject these variables seamlessly into our layout templates without hardcoding:
+  * Business Metadata: Legal Name, Address, Phone, Geolocation, Live Opening Hours.
+  * Visual Token Matrix: Primary Branding Color, Secondary Accent Color, Custom Logo URL, Favicon URL.
+  * API Key Layer: Tenant-specific Twilio Number, unique eBay OAuth Credentials, and unique Stripe Connect IDs.
+
+#### 2. Stripe Connect Marketplace Split-Fee Pipeline
+- Split-Payment Logic: Integrate the Stripe Connect API utilizing Direct Charges or Destination Charges.
+- Execution Flow: When a buyer checks out on a yard’s site, the payment gateway must process the card transaction, immediately push the core funds to that specific yard’s custom Stripe Express/Custom connected account, and automatically subtract our fixed technology fee (3% to 5% commission) directly into our platform's bank account.
+
+---
+
+### FRONTEND ENGINE: THE "DUMMY-PROOF" WORKER UI
+
+#### 1. The 3-Step Mobile Upload Wizard
+Yard workers are not tech-savvy. The frontend dashboard must feature a bold, touch-optimized, multi-step smartphone wizard that completely eliminates complex form interfaces.
+- Step 1: Media Capture: A massive file-input button that immediately triggers the device camera. The worker takes 2 to 3 photos of the part, which are uploaded asynchronously via a background worker to our storage bucket.
+- Step 2: Identification & Category Grid: 
+  * A prominent input field for the Vehicle Registration Number (VRN).
+  * A clean, visual card grid with large, tap-friendly buttons representing core part categories (e.g., 'Engine', 'Gearbox', 'Axle/Suspension', 'Door/Body', 'Lights').
+- Step 3: Monetization & Publication: A simple input for the listing price and a giant green 'PUBLISH LIVE' button.
+
+#### 2. Automatic Data Ingestion & SEO Title Generation
+- VRN Service Layer Lookup: Embed an abstraction layer for a UK vehicle registration data lookup API (e.g., DVLA data provider). The moment the worker completes Step 2, our system calls this service using the plate number to automatically populate hidden metadata attributes: Make, Model, Year, Fuel Type, and Engine Code.
+- Automated SEO Optimization: The system must run a title generator function to synthesize a human-readable, search-indexed listing title automatically (e.g., `[Year] + [Make] + [Model] + [Engine Code] + [Part Category]`). Example output: "2018 Ford Fiesta 1.0L Petrol Alternator". Workers never type descriptions manually.
+
+---
+
+### AUTOMATED SALES & DISTRIBUTION PIPELINE
+
+#### 1. Background Multi-Channel Sync Webhooks
+- Asynchronous Processing: The moment an item state shifts to 'Active', our system must fire an asynchronous event hook.
+- Automated eBay Syndication: Build an execution module that serializes our part schema into a structured eBay marketplace payload. It must utilize the eBay Inventory API to automatically generate and launch a live marketplace listing under that specific scrap yard's connected commercial profile.
+- Dynamic Local SEO Injection: The system must automatically build public-facing collection pages optimized explicitly for local search intents. The URL path structure must dynamically inject geographic variables: `/parts/[make]-[model]-[part-name]-[yard-city]`.
+
+#### 2. The Inventory-Aware Chatbot & SMS Wishlist Machine
+- Context-Aware Inventory Queries: Refactor our existing chatbot endpoint (`/api/chatbot/query`). When a user types a natural language query into the chat terminal, the system must extract structural attributes (Make, Model, Part Name) and query our internal, tenant-isolated inventory database table.
+- The Upsell Flow: 
+  * If the item is IN STOCK: The chatbot returns an instant image, price data, and a direct Stripe Checkout URL link.
+  * If the item is OUT OF STOCK: The chatbot triggers this fallback sequence: "I can't find that exact part right now, but our trucks bring in new salvage cars daily. Would you like me to register your mobile number for an instant text alert the second it arrives?"
+- Database Wishlist Schema: If the user responds with their mobile number, write an active entry straight into a new `wishlists` data table logging: `id`, `tenant_id`, `customer_phone`, `customer_name`, `vehicle_make`, `vehicle_model`, `part_category`, and `is_fulfilled: false`.
+- The Automated Closer Trigger: Write a database trigger (or database model middleware) that activates instantly upon a new row insertion in the `inventory` table. The hook must perform a relational scan on the `wishlists` table matching: `tenant_id`, `vehicle_make`, `vehicle_model`, and `part_category` where `is_fulfilled == false`.
+- If a match is verified, it calls our Twilio SMS gateway script to execute an automated text broadcast to the customer: "Great news [Customer Name]! [Yard Name] just cataloged a [Year] [Make] [Model] [Part Name]. Tap here to buy it instantly before someone else grabs it: [Direct Stripe Checkout Link]". Once successfully transmitted, toggle the wishlist status to `is_fulfilled = true`.
+
+---
+
+Please acknowledge your total understanding of this comprehensive system architecture, database structure, and the critical design patterns required for non-tech users. Do not write the full codebase at once. 
+
+Provide a breakdown of our database schemas (Tenants, Inventory, Wishlists, Orders) first, and ask me to proceed with Phase 1 coding.
+
+### MASTER API ADDENDUM: EXTRACTION, MARKETPLACE & LOGISTICS INTEGRATION
+
+Please incorporate these precise technical requirements for our third-party API modules directly into the software architecture specification:
+
+1. ROYAL MAIL / SHIPPING LABEL ENGINE (Logistics Pipeline)
+- Build a service integration placeholder for the Royal Mail Shipping API (ShippingAMQP or RESTful Click & Drop API).
+- Workflow Trigger: The moment an order status updates to 'Paid', expose a 'Generate Shipping Label' action button in the scrap yard worker's dashboard.
+- Execution Payload: The backend script must capture the tenant's return address from the `tenants` table, compile it with the buyer's shipping address, assign a default structural package weight based on the part category (e.g., Alternator = 3kg, Door Panel = 15kg), and send a POST request to Royal Mail to generate a tracking number and a printable PDF shipping label.
+
+2. EBAY INVENTORY API CLIENT (Marketplace Sync)
+- Build a dedicated background queue using an OAuth 2.0 Client credentials flow for the eBay Inventory API (`/commerce/inventory/v1/inventory_item`).
+- Execution Payload: When a part goes 'Active' in our database, the background service must automatically:
+  * Convert the local dynamic inventory ID into an eBay 'SKU'.
+  * Format the product image URLs, price matrix, and the custom auto-generated SEO title into the eBay JSON payload structure.
+  * Map the part to the correct eBay UK category ID based on our simple grid category (e.g., Alternators map to eBay UK Category ID: 174026).
+  * Automatically push and publish the listing live.
+
+Please confirm these specific API endpoints, background payloads, and shipping webhooks are fully integrated into our Phase 1 database design.
