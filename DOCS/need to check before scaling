@@ -1,0 +1,20 @@
+ 🔍 Content & Relevance (On-Page SEO)
+Keyword Intent: Match your text to actual user queries, like "used Ford parts Birmingham" instead of just "car parts."
+High-Value Information: Write deep, helpful content that answers user questions better than your competitors do.
+Strategic HTML Placement: Place your primary keywords naturally inside your H1 title tags, headers, and the first 100 words of text.
+Image Alt Text: Describe your images using clear text descriptions in the HTML so Google's image crawlers can index them. [1, 2, 3, 4, 5]
+
+⚙️ Technical Foundation & Performance
+Mobile-First Design: Ensure your layout scales perfectly on mobile devices, as Google ranks sites primarily based on mobile rendering.
+Page Loading Speed: Optimize your site speed to pass Google's Core Web Vitals metrics, minimizing bounce rates from impatient users.
+HTTPS Encryption: Secure your site with an SSL certificate; Google flags unencrypted HTTP sites as unsafe.
+Clean URL Structures: Use descriptive, readable page URLs (like /parts/bmw-alternator) rather than random strings of numbers. [1, 2, 3, 4, 5]
+
+🌐 Authority & Trust (Off-Page SEO)
+Quality Backlinks: Earn links from reputable, industry-related websites to signal to Google that your platform is a trusted authority. [1, 2, 3, 4, 5]
+EEAT Signals: Demonstrate Experience, Expertise, Authoritativeness, and Trustworthiness by publishing clear physical addresses, terms of service, and author bios. [1, 2]
+Structured Schema Data: Implement structured data markup (Schema.org) in your code to help Google understand your specific business type, product inventory, and prices. [1, 2, 3, 4, 5]
+
+📍 Local Search Optimization (Crucial for Scrapyards)
+Google Business Profile: Claim and optimize your local listing to capture high-intent search traffic from Google Maps.
+Consistent NAP Data: Ensure your Name, Address, and Phone number match exactly across your website, social media, and local directories. [1, 2, 3, 4, 5]
