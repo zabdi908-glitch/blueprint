@@ -1,0 +1,754 @@
+{%- set photos = parts_agent.get_photos(part.id) | selectattr('photo_order', 'lt', 100) | list -%}
+{% extends "base.html" %}
+
+{% block title %}{{ part.part_name }} - {{ part.make }} {{ part.model }} | Cherrywood Auto Parts{% endblock %}
+
+{% block meta_description %}
+<meta name="description" content="{{ meta_description or 'Quality used VAG parts from Cherrywood Auto Parts' }}">
+{% endblock %}
+
+{% block extra_head %}
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph (used by WhatsApp, Facebook, etc. when this link is shared) -->
+<meta property="og:type" content="product">
+<meta property="og:title" content="{{ part.part_name }} - {{ part.make }} {{ part.model }}">
+<meta property="og:description" content="{{ meta_description or 'Quality used VAG parts from Cherrywood Auto Parts' }}">
+<meta property="og:url" content="{{ request.url }}">
+<meta property="og:site_name" content="Cherrywood Auto Parts">
+{%- if photos %}
+<meta property="og:image" content="{{ request.url_root.rstrip('/') }}{{ photos[0].photo_url }}">
+{%- endif %}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ part.part_name }} - {{ part.make }} {{ part.model }}">
+<meta name="twitter:description" content="{{ meta_description or 'Quality used VAG parts from Cherrywood Auto Parts' }}">
+{%- if photos %}
+<meta name="twitter:image" content="{{ request.url_root.rstrip('/') }}{{ photos[0].photo_url }}">
+{%- endif %}
+
+<style>
+    @media (max-width: 767px) {
+        body { padding-bottom: 76px; }
+    }
+</style>
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "{{ part.part_name }}",
+    "description": "{{ part.part_name }} - OEM: {{ part.oem_number or 'N/A' }}. Compatible with {{ part.make }} {{ part.model }} {{ part.generation or '' }}.",
+    "sku": "{{ part.stock_id }}",
+    "mpn": "{{ part.oem_number or '' }}",
+    {%- if photos %}
+    "image": [
+        {%- for photo in photos %}
+        "{{ request.url_root.rstrip('/') }}{{ photo.photo_url }}"{{ "," if not loop.last }}
+        {%- endfor %}
+    ],
+    {%- endif %}
+    "brand": {
+        "@type": "Brand",
+        "name": "{{ part.make or 'Cherrywood Auto Parts' }}"
+    },
+    "offers": {
+        "@type": "Offer",
+        "price": "{{ part.price }}",
+        "priceCurrency": "GBP",
+        "availability": "{% if part.stock_status == 'Available' %}https://schema.org/InStock{% elif part.stock_status == 'Reserved' %}https://schema.org/LimitedAvailability{% else %}https://schema.org/OutOfStock{% endif %}",
+        "url": "{{ request.url }}",
+        "seller": {
+            "@type": "Organization",
+            "name": "Cherrywood Auto Parts"
+        }
+    }
+}
+</script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ request.url_root.rstrip('/') }}/"},
+        {"@type": "ListItem", "position": 2, "name": "Parts", "item": "{{ request.url_root.rstrip('/') }}/parts-public"},
+        {"@type": "ListItem", "position": 3, "name": "{{ part.category }}", "item": "{{ request.url_root.rstrip('/') }}/parts-public?category={{ part.category }}"},
+        {"@type": "ListItem", "position": 4, "name": "{{ part.part_name }}"}
+    ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+    <div class="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
+        <!-- ===== BREADCRUMBS ===== -->
+        <nav aria-label="Breadcrumb" class="mb-4">
+            <ol class="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                <li><a href="/" class="hover:text-[#f97316] transition">Home</a></li>
+                <li><i class="fa-solid fa-chevron-right text-[9px]"></i></li>
+                <li><a href="/parts-public" class="hover:text-[#f97316] transition">Parts</a></li>
+                <li><i class="fa-solid fa-chevron-right text-[9px]"></i></li>
+                <li><a href="/parts-public?category={{ part.category }}" class="hover:text-[#f97316] transition">{{ part.category }}</a></li>
+                <li><i class="fa-solid fa-chevron-right text-[9px]"></i></li>
+                <li class="text-white font-bold truncate max-w-[200px]" aria-current="page">{{ part.part_name }}</li>
+            </ol>
+        </nav>
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl overflow-hidden">
+            <!-- Photo Gallery -->
+            <div class="h-96 bg-slate-900 relative">
+                {% if photos %}
+                    <img id="main-part-photo" src="{{ photos[0].photo_url }}" alt="{{ part.part_name }}"
+                         class="w-full h-full object-contain cursor-zoom-in"
+                         loading="lazy" decoding="async"
+                         onclick="openLightbox(currentPhotoIndex)">
+
+                    {% if photos|length > 1 %}
+                    <button onclick="prevPhoto()" aria-label="Previous photo"
+                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button onclick="nextPhoto()" aria-label="Next photo"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    {% endif %}
+
+                    <button onclick="openLightbox(currentPhotoIndex)" aria-label="View fullscreen"
+                            class="absolute bottom-2 right-2 bg-black/50 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center transition">
+                        <i class="fa-solid fa-expand"></i>
+                    </button>
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-slate-800">
+                        <div class="text-center">
+                            <i class="fa-solid fa-image text-6xl text-slate-600 mb-4 block"></i>
+                            <p class="text-slate-400">No photos</p>
+                        </div>
+                    </div>
+                {% endif %}
+                <span class="absolute top-3 right-3 px-4 py-2 rounded-full text-sm font-bold 
+                    {% if part.stock_status == 'Available' %}bg-green-600 text-white{% endif %}
+                    {% if part.stock_status == 'Reserved' %}bg-yellow-600 text-black{% endif %}
+                    {% if part.stock_status == 'Sold' %}bg-red-600 text-white{% endif %}">
+                    {{ part.stock_status }}
+                </span>
+            </div>
+
+            <!-- Thumbnail strip — only shown when there's more than one photo -->
+            {% if photos|length > 1 %}
+            <div class="flex gap-2 p-4 bg-[#0b0f19] overflow-x-auto">
+                {% for photo in photos %}
+                <img src="{{ photo.photo_url }}"
+                     loading="lazy" decoding="async"
+                     onclick="showPhoto({{ loop.index0 }})"
+                     data-index="{{ loop.index0 }}"
+                     class="part-thumb w-16 h-16 object-cover rounded-lg border-2 {{ 'border-[#f97316]' if loop.first else 'border-slate-700' }} cursor-pointer hover:border-[#f97316] transition flex-shrink-0"
+                     alt="{{ part.part_name }} photo {{ loop.index }}">
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="p-8">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-3xl font-black text-white">{{ part.part_name }}</h1>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                            <span class="text-sm text-slate-400 flex items-center gap-1.5">
+                                OEM: {{ part.oem_number or 'N/A' }}
+                                {% if part.oem_number %}
+                                <button onclick="copyText('{{ part.oem_number }}', this)" aria-label="Copy OEM number"
+                                        class="text-slate-500 hover:text-[#f97316] transition">
+                                    <i class="fa-regular fa-copy text-xs"></i>
+                                </button>
+                                {% endif %}
+                            </span>
+                            <span class="text-sm text-slate-400 flex items-center gap-1.5">
+                                Stock ID: {{ part.stock_id }}
+                                <button onclick="copyText('{{ part.stock_id }}', this)" aria-label="Copy Stock ID"
+                                        class="text-slate-500 hover:text-[#f97316] transition">
+                                    <i class="fa-regular fa-copy text-xs"></i>
+                                </button>
+                            </span>
+                        </div>
+                        <p class="text-sm text-slate-400 mt-1">{{ part.make }} {{ part.model }} {{ part.generation or '' }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleSave('{{ part.id }}', this)" id="save-btn" aria-label="Save part"
+                                class="w-10 h-10 rounded-full bg-[#0f172a] border border-slate-700 hover:border-[#f97316] flex items-center justify-center transition flex-shrink-0">
+                            <i class="fa-regular fa-heart text-slate-300"></i>
+                        </button>
+                        <button onclick="sharePart()" aria-label="Share this part"
+                                class="w-10 h-10 rounded-full bg-[#0f172a] border border-slate-700 hover:border-[#f97316] flex items-center justify-center transition flex-shrink-0">
+                            <i class="fa-solid fa-share-nodes text-slate-300"></i>
+                        </button>
+                        <button onclick="window.print()" aria-label="Print this page"
+                                class="w-10 h-10 rounded-full bg-[#0f172a] border border-slate-700 hover:border-[#f97316] flex items-center justify-center transition flex-shrink-0 hidden sm:flex">
+                            <i class="fa-solid fa-print text-slate-300"></i>
+                        </button>
+                        <span class="px-4 py-2 rounded-full text-sm font-bold flex-shrink-0
+                            {% if part.stock_status == 'Available' %}bg-green-600 text-white{% endif %}
+                            {% if part.stock_status == 'Reserved' %}bg-yellow-600 text-black{% endif %}
+                            {% if part.stock_status == 'Sold' %}bg-red-600 text-white{% endif %}">
+                            {{ part.stock_status }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 p-4 bg-[#0f172a] rounded-xl">
+                    <div>
+                        <p class="text-xs text-slate-500">Category</p>
+                        <p class="font-bold text-white">{{ part.category }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Part Type</p>
+                        <p class="font-bold text-white">{{ part.part_type or 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Engine Code</p>
+                        <p class="font-bold text-white">{{ part.engine_code or 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Condition</p>
+                        <p class="font-bold text-white">{{ part.condition }}</p>
+                    </div>
+                </div>
+
+                <!-- ===== DONOR VEHICLE SPECIFICATIONS ===== -->
+                {% if part.year or part.mileage or part.fuel_type or part.transmission or part.engine_size or part.colour or part.registration or part.vin or part.side or part.position %}
+                <div class="mt-4 p-4 bg-[#0f172a] rounded-xl">
+                    <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider mb-3">Donor Vehicle Details</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {% if part.year %}
+                        <div>
+                            <p class="text-xs text-slate-500">Year</p>
+                            <p class="font-bold text-white">{{ part.year }}</p>
+                        </div>
+                        {% endif %}
+                        {% if part.mileage %}
+                        <div>
+                            <p class="text-xs text-slate-500">Mileage</p>
+                            <p class="font-bold text-white">{{ '{:,}'.format(part.mileage) }} mi</p>
+                        </div>
+                        {% endif %}
+                        {% if part.fuel_type %}
+                        <div>
+                            <p class="text-xs text-slate-500">Fuel Type</p>
+                            <p class="font-bold text-white">{{ part.fuel_type }}</p>
+                        </div>
+                        {% endif %}
+                        {% if part.transmission %}
+                        <div>
+                            <p class="text-xs text-slate-500">Transmission</p>
+                            <p class="font-bold text-white">{{ part.transmission }}</p>
+                        </div>
+                        {% endif %}
+                        {% if part.engine_size %}
+                        <div>
+                            <p class="text-xs text-slate-500">Engine Size</p>
+                            <p class="font-bold text-white">{{ part.engine_size }}L</p>
+                        </div>
+                        {% endif %}
+                        {% if part.colour %}
+                        <div>
+                            <p class="text-xs text-slate-500">Colour</p>
+                            <p class="font-bold text-white">{{ part.colour }}</p>
+                        </div>
+                        {% endif %}
+                        {% if part.side %}
+                        <div>
+                            <p class="text-xs text-slate-500">Side</p>
+                            <p class="font-bold text-white">{{ part.side }}</p>
+                        </div>
+                        {% endif %}
+                        {% if part.position %}
+                        <div>
+                            <p class="text-xs text-slate-500">Position</p>
+                            <p class="font-bold text-white">{{ part.position }}</p>
+                        </div>
+                        {% endif %}
+                        {% if part.registration %}
+                        <div>
+                            <p class="text-xs text-slate-500">Ex-Registration</p>
+                            <p class="font-bold text-yellow-400">{{ part.registration }}</p>
+                        </div>
+                        {% endif %}
+                        {% if part.vin %}
+                        <div>
+                            <p class="text-xs text-slate-500">VIN</p>
+                            <p class="font-bold text-white font-mono text-sm">{{ ('*' * (part.vin|length - 4) + part.vin[-4:]) if part.vin|length >= 5 else part.vin }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {%- set whatsapp_message -%}
+Hi Cherrywood Auto Parts,
+
+I'm interested in the following part:
+
+Part: {{ part.part_name }}
+Stock ID: {{ part.stock_id }}
+{%- if part.oem_number %}
+OEM: {{ part.oem_number }}
+{%- endif %}
+Price: £{{ "{:,.2f}".format(part.price) }}
+Vehicle: {{ part.make }} {{ part.model }}{{ (" " ~ part.generation) if part.generation else "" }}
+Status: {{ part.stock_status }}
+
+Part link: {{ request.url }}
+
+Could you confirm availability and next steps?
+
+Thank you.
+                {%- endset -%}
+                {%- set delivery_message -%}
+Hi Cherrywood Auto Parts,
+
+I'd like a delivery quote for the following part:
+
+Part: {{ part.part_name }}
+Stock ID: {{ part.stock_id }}
+{%- if part.oem_number %}
+OEM: {{ part.oem_number }}
+{%- endif %}
+Price: £{{ "{:,.2f}".format(part.price) }}
+Vehicle: {{ part.make }} {{ part.model }}{{ (" " ~ part.generation) if part.generation else "" }}
+Status: {{ part.stock_status }}
+
+Part link: {{ request.url }}
+
+Delivery postcode: __________
+
+Could you let me know the delivery cost and estimated delivery time?
+
+Thank you.
+                {%- endset -%}
+
+                <div class="mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-3xl font-black text-[#f97316]">£{{ "%.2f"|format(part.price) }}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <a href="{{ bot_settings.whatsapp_link }}?text={{ whatsapp_message.strip() | urlencode }}" target="_blank"
+                           class="px-6 py-3.5 bg-[#22c55e] text-white font-black rounded-lg hover:bg-green-600 transition flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-xl"></i> WhatsApp Enquiry
+                        </a>
+                        <a href="tel:{{ bot_settings.company_phone }}"
+                           class="px-6 py-3.5 bg-slate-700 text-white font-black rounded-lg hover:bg-slate-600 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-phone"></i> Call Now
+                        </a>
+                        <a href="{{ bot_settings.whatsapp_link }}?text={{ delivery_message.strip() | urlencode }}" target="_blank"
+                           class="px-6 py-3 bg-[#0f172a] border border-slate-700 hover:border-[#f97316] text-white font-bold rounded-lg transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-truck-fast"></i> Request Delivery Quote
+                        </a>
+                        <a href="/parts-public"
+                           class="px-6 py-3 bg-[#0f172a] border border-slate-700 hover:border-[#f97316] text-white font-bold rounded-lg transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Parts
+                        </a>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3 text-center sm:text-left">
+                        Prefer to browse by car? <a href="/gallery" class="text-[#f97316] hover:underline">See our vehicles in stock</a>.
+                    </p>
+                </div>
+
+                <!-- Trust signals -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-6 border-t border-slate-800">
+                    <a href="/warranty" class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#0f172a] transition">
+                        <i class="fa-solid fa-shield-halved text-[#f97316] text-xl"></i>
+                        <div>
+                            <p class="text-sm font-bold text-white">90-Day Warranty</p>
+                            <p class="text-xs text-slate-500">On all mechanical parts</p>
+                        </div>
+                    </a>
+                    <a href="/delivery" class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#0f172a] transition">
+                        <i class="fa-solid fa-truck-fast text-[#f97316] text-xl"></i>
+                        <div>
+                            <p class="text-sm font-bold text-white">Nationwide Delivery</p>
+                            <p class="text-xs text-slate-500">UK-wide shipping available</p>
+                        </div>
+                    </a>
+                    <div class="flex items-center gap-3 p-3">
+                        <i class="fa-solid fa-certificate text-[#f97316] text-xl"></i>
+                        <div>
+                            <p class="text-sm font-bold text-white">Licensed Recycler</p>
+                            <p class="text-xs text-slate-500">EA Licence: 102422</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if part.notes %}
+                <div class="mt-6 pt-4 border-t border-slate-800">
+                    <p class="text-xs text-slate-400">Notes</p>
+                    <p class="text-white">{{ part.notes }}</p>
+                </div>
+                {% endif %}
+
+                {% if session.get('logged_in') %}
+                <div class="mt-6 pt-4 border-t border-slate-800 flex gap-3">
+                    <a href="/parts/edit/{{ part.id }}" class="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Edit Part (Admin)
+                    </a>
+                </div>
+                {% endif %}
+
+                <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 text-white text-sm font-bold px-4 py-2.5 rounded-full shadow-xl z-50"></div>
+            </div>
+        </div>
+
+        <!-- ===== MORE FROM THIS VEHICLE ===== -->
+        {% if same_vehicle_parts %}
+        <div class="mt-10">
+            <h2 class="text-xl font-black text-white mb-4">More From This Vehicle</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {% for p in same_vehicle_parts %}
+                <a href="/part/{{ p.slug or p.id }}" class="bg-[#111827] border border-slate-800 rounded-xl overflow-hidden hover:border-[#f97316] transition block">
+                    <div class="h-32 bg-slate-900">
+                        {% if p.photo_url %}
+                        <img src="{{ p.photo_url }}" class="w-full h-full object-contain" loading="lazy" decoding="async" alt="{{ p.part_name }}">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center"><i class="fa-solid fa-image text-2xl text-slate-700"></i></div>
+                        {% endif %}
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm font-bold text-white truncate">{{ p.part_name }}</p>
+                        <p class="text-[#f97316] font-black text-sm mt-1">£{{ "%.2f"|format(p.price) }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ===== SIMILAR PARTS ===== -->
+        {% if similar_parts %}
+        <div class="mt-10">
+            <h2 class="text-xl font-black text-white mb-4">You Might Also Like</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {% for p in similar_parts %}
+                <a href="/part/{{ p.slug or p.id }}" class="bg-[#111827] border border-slate-800 rounded-xl overflow-hidden hover:border-[#f97316] transition block">
+                    <div class="h-32 bg-slate-900">
+                        {% if p.photo_url %}
+                        <img src="{{ p.photo_url }}" class="w-full h-full object-contain" loading="lazy" decoding="async" alt="{{ p.part_name }}">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center"><i class="fa-solid fa-image text-2xl text-slate-700"></i></div>
+                        {% endif %}
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm font-bold text-white truncate">{{ p.part_name }}</p>
+                        <p class="text-[#f97316] font-black text-sm mt-1">£{{ "%.2f"|format(p.price) }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ===== RECENTLY VIEWED (rendered client-side from the browser's own history) ===== -->
+        <div id="recently-viewed-section" class="mt-10 hidden">
+            <h2 class="text-xl font-black text-white mb-4">Recently Viewed</h2>
+            <div id="recently-viewed-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- ===== LIGHTBOX (fullscreen viewer) ===== -->
+    <div id="lightbox" class="hidden fixed inset-0 bg-black/95 z-[100] items-center justify-center"
+         onclick="if (event.target === this) closeLightbox();">
+        <button onclick="closeLightbox()" aria-label="Close"
+                class="absolute top-4 right-4 text-white text-2xl w-12 h-12 flex items-center justify-center hover:bg-white/10 rounded-full transition z-10">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div id="lightbox-counter" class="absolute top-4 left-4 text-white text-sm font-bold bg-black/50 px-3 py-1.5 rounded-full z-10"></div>
+
+        {% if photos|length > 1 %}
+        <button onclick="lightboxPrev()" aria-label="Previous photo"
+                class="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-white w-11 h-11 md:w-12 md:h-12 flex items-center justify-center bg-black/50 hover:bg-black/70 rounded-full transition text-lg z-10">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button onclick="lightboxNext()" aria-label="Next photo"
+                class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-white w-11 h-11 md:w-12 md:h-12 flex items-center justify-center bg-black/50 hover:bg-black/70 rounded-full transition text-lg z-10">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        {% endif %}
+
+        <img id="lightbox-img" src="" alt="{{ part.part_name }}"
+             class="max-w-[90vw] max-h-[85vh] object-contain cursor-zoom-in"
+             style="transition: transform 0.1s ease-out;"
+             loading="lazy" decoding="async"
+             onmousemove="handleZoomMove(event)" onmouseleave="resetZoom()">
+
+        <p class="absolute bottom-4 text-white/50 text-xs hidden md:block">Hover image to zoom · Arrow keys to navigate · Esc to close</p>
+    </div>
+
+    <!-- ===== STICKY MOBILE PRICE + ENQUIRY BAR ===== -->
+    <!-- Mobile only (hidden md:up) — the page has grown long with specs,
+         related parts, and recently viewed sections, so on a phone the
+         price/enquiry buttons in the main content can end up scrolled well
+         out of view. This keeps them reachable at all times. -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#111827] border-t border-slate-800 shadow-2xl">
+        <div class="flex items-center gap-3 px-4 py-3">
+            <div class="flex-shrink-0">
+                <p class="text-[10px] text-slate-400 uppercase font-bold leading-none">Price</p>
+                <p class="text-lg font-black text-[#f97316] leading-tight">£{{ "%.2f"|format(part.price) }}</p>
+            </div>
+            <a href="{{ bot_settings.whatsapp_link }}?text={{ whatsapp_message.strip() | urlencode }}" target="_blank"
+               class="flex-1 bg-[#22c55e] text-white font-black py-3 rounded-lg text-center text-sm flex items-center justify-center gap-2">
+                <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp Enquiry
+            </a>
+            <a href="tel:{{ bot_settings.company_phone }}" aria-label="Call us"
+               class="flex-shrink-0 w-12 h-12 bg-slate-700 text-white rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-phone"></i>
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+        // ===== GALLERY STATE =====
+        const galleryPhotos = {{ photos | map(attribute='photo_url') | list | tojson }};
+        let currentPhotoIndex = 0;
+
+        function showPhoto(index) {
+            if (galleryPhotos.length === 0) return;
+            currentPhotoIndex = ((index % galleryPhotos.length) + galleryPhotos.length) % galleryPhotos.length;
+            const url = galleryPhotos[currentPhotoIndex];
+
+            const mainImg = document.getElementById('main-part-photo');
+            if (mainImg) mainImg.src = url;
+
+            document.querySelectorAll('.part-thumb').forEach((thumb) => {
+                const isActive = parseInt(thumb.dataset.index, 10) === currentPhotoIndex;
+                thumb.classList.toggle('border-[#f97316]', isActive);
+                thumb.classList.toggle('border-slate-700', !isActive);
+            });
+
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox && !lightbox.classList.contains('hidden')) {
+                updateLightboxImage();
+            }
+        }
+
+        function nextPhoto() { showPhoto(currentPhotoIndex + 1); }
+        function prevPhoto() { showPhoto(currentPhotoIndex - 1); }
+        function lightboxNext() { showPhoto(currentPhotoIndex + 1); }
+        function lightboxPrev() { showPhoto(currentPhotoIndex - 1); }
+
+        // ===== LIGHTBOX =====
+        function openLightbox(index) {
+            if (galleryPhotos.length === 0) return;
+            currentPhotoIndex = index;
+            updateLightboxImage();
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('hidden');
+            lightbox.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('hidden');
+            lightbox.classList.remove('flex');
+            document.body.style.overflow = '';
+            resetZoom();
+        }
+
+        function updateLightboxImage() {
+            const img = document.getElementById('lightbox-img');
+            img.src = galleryPhotos[currentPhotoIndex];
+            const counter = document.getElementById('lightbox-counter');
+            if (counter) counter.textContent = (currentPhotoIndex + 1) + ' / ' + galleryPhotos.length;
+            resetZoom();
+        }
+
+        // ===== DESKTOP HOVER ZOOM =====
+        function handleZoomMove(e) {
+            const img = document.getElementById('lightbox-img');
+            const rect = img.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            img.style.transformOrigin = x + '% ' + y + '%';
+            img.style.transform = 'scale(2)';
+        }
+
+        function resetZoom() {
+            const img = document.getElementById('lightbox-img');
+            if (!img) return;
+            img.style.transform = 'scale(1)';
+            img.style.transformOrigin = 'center center';
+        }
+
+        // ===== KEYBOARD NAVIGATION =====
+        document.addEventListener('keydown', function(e) {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('hidden')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') lightboxNext();
+            if (e.key === 'ArrowLeft') lightboxPrev();
+        });
+
+        // ===== SWIPE GESTURES (mobile) =====
+        function attachSwipe(el, onSwipeLeft, onSwipeRight) {
+            if (!el) return;
+            let touchStartX = 0;
+            el.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+            el.addEventListener('touchend', function(e) {
+                const touchEndX = e.changedTouches[0].screenX;
+                const diff = touchEndX - touchStartX;
+                if (Math.abs(diff) > 50) {
+                    if (diff < 0) onSwipeLeft(); else onSwipeRight();
+                }
+            }, { passive: true });
+        }
+        attachSwipe(document.getElementById('main-part-photo'), nextPhoto, prevPhoto);
+        attachSwipe(document.getElementById('lightbox-img'), lightboxNext, lightboxPrev);
+
+        // ===== TOAST (small confirmation message) =====
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+
+        // ===== COPY TO CLIPBOARD =====
+        function copyText(text, buttonEl) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied: ' + text);
+                if (buttonEl) {
+                    const icon = buttonEl.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fa-solid fa-check text-xs text-green-400';
+                    setTimeout(() => { icon.className = originalClass; }, 1200);
+                }
+            }).catch(() => {
+                showToast('Could not copy — try selecting the text manually');
+            });
+        }
+
+        // ===== SAVE / FAVOURITE (browser-only, no account needed) =====
+        const SAVED_PARTS_KEY = 'cherrywood_saved_parts';
+
+        function getSavedParts() {
+            try {
+                return JSON.parse(localStorage.getItem(SAVED_PARTS_KEY)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function toggleSave(partId, buttonEl) {
+            let saved = getSavedParts();
+            const icon = buttonEl.querySelector('i');
+            if (saved.includes(partId)) {
+                saved = saved.filter(id => id !== partId);
+                icon.className = 'fa-regular fa-heart text-slate-300';
+                showToast('Removed from saved parts');
+            } else {
+                saved.push(partId);
+                icon.className = 'fa-solid fa-heart text-[#f97316]';
+                showToast('Saved — find it again anytime from this browser');
+            }
+            localStorage.setItem(SAVED_PARTS_KEY, JSON.stringify(saved));
+        }
+
+        // Reflect saved state on page load
+        (function initSaveButton() {
+            const partId = "{{ part.id }}";
+            const btn = document.getElementById('save-btn');
+            if (!btn) return;
+            const saved = getSavedParts();
+            if (saved.includes(partId)) {
+                btn.querySelector('i').className = 'fa-solid fa-heart text-[#f97316]';
+            }
+        })();
+
+        // ===== RECENTLY VIEWED =====
+        const RECENTLY_VIEWED_KEY = 'cherrywood_recently_viewed';
+        const MAX_RECENTLY_VIEWED = 10;
+
+        function getRecentlyViewed() {
+            try {
+                return JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function trackRecentlyViewed(partId) {
+            let recent = getRecentlyViewed();
+            recent = recent.filter(id => id !== partId);  // remove if already present, so it moves to the front
+            recent.unshift(partId);
+            recent = recent.slice(0, MAX_RECENTLY_VIEWED);
+            localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(recent));
+            return recent;
+        }
+
+        function escapeHtmlText(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        async function renderRecentlyViewed() {
+            const currentPartId = "{{ part.id }}";
+            const recent = trackRecentlyViewed(currentPartId);
+            const idsToShow = recent.filter(id => id !== currentPartId).slice(0, 4);
+
+            if (idsToShow.length === 0) return;  // nothing else viewed yet — leave the section hidden
+
+            try {
+                const response = await fetch('/api/parts-by-ids', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: idsToShow }),
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!data.parts || data.parts.length === 0) return;
+
+                const grid = document.getElementById('recently-viewed-grid');
+                grid.innerHTML = data.parts.map(p => {
+                    const imgHtml = p.photo_url
+                        ? `<img src="${escapeHtmlText(p.photo_url)}" class="w-full h-full object-contain" loading="lazy" decoding="async" alt="${escapeHtmlText(p.part_name)}">`
+                        : `<div class="w-full h-full flex items-center justify-center"><i class="fa-solid fa-image text-2xl text-slate-700"></i></div>`;
+                    return `<a href="/part/${escapeHtmlText(String(p.slug))}" class="bg-[#111827] border border-slate-800 rounded-xl overflow-hidden hover:border-[#f97316] transition block">
+                        <div class="h-32 bg-slate-900">${imgHtml}</div>
+                        <div class="p-3">
+                            <p class="text-sm font-bold text-white truncate">${escapeHtmlText(p.part_name)}</p>
+                            <p class="text-[#f97316] font-black text-sm mt-1">£${Number(p.price).toFixed(2)}</p>
+                        </div>
+                    </a>`;
+                }).join('');
+
+                document.getElementById('recently-viewed-section').classList.remove('hidden');
+            } catch (err) {
+                console.error('Could not load recently viewed parts:', err);
+                // fails silently — this is a nice-to-have section, not core functionality
+            }
+        }
+        renderRecentlyViewed();
+
+        // ===== SHARE =====
+        function sharePart() {
+            const shareData = {
+                title: "{{ part.part_name }}",
+                text: "Check out this part at Cherrywood Auto Parts: {{ part.part_name }}",
+                url: window.location.href
+            };
+            if (navigator.share) {
+                navigator.share(shareData).catch(() => {}); // user cancelled — no error needed
+            } else {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showToast('Link copied to clipboard');
+                }).catch(() => {
+                    showToast('Could not copy link');
+                });
+            }
+        }
+</script>
+{% endblock %}

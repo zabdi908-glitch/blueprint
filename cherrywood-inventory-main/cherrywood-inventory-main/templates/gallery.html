@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Gallery - Cherrywood Auto Parts{% endblock %}
+
+{% block content %}
+    <div class="max-w-7xl mx-auto px-4 py-12 w-full">
+        <h1 class="text-3xl font-black text-white mb-2 flex items-center gap-3">
+            <i class="fa-solid fa-images text-[#f97316]"></i> Our Vehicle Gallery
+        </h1>
+        <p class="text-slate-400 text-sm mb-8">Browse all available donor vehicles and parts</p>
+
+        <!-- Search -->
+        <div class="max-w-2xl mb-8">
+            <form action="/gallery" method="GET" class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1">
+                    <input type="text" name="q" 
+                           placeholder="🔍 Search by make, model, or part..." 
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-[#f97316] outline-none transition"
+                           value="{{ search_query or '' }}">
+                </div>
+                <button type="submit" class="px-6 py-3 bg-[#f97316] text-black font-black text-sm uppercase tracking-wider rounded-lg hover:bg-orange-500 transition">
+                    Search
+                </button>
+                {% if search_query %}
+                    <a href="/gallery" class="px-6 py-3 bg-slate-700 text-white font-black text-sm uppercase tracking-wider rounded-lg hover:bg-slate-600 transition text-center">
+                        Clear
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Vehicle Grid -->
+        {% if not vehicles %}
+        <div class="text-center py-12 bg-[#111827] rounded-2xl border border-slate-800">
+            <i class="fa-solid fa-car text-4xl text-slate-600 mb-4 block"></i>
+            <p class="text-slate-400">No vehicles found{% if search_query %} matching "{{ search_query }}"{% endif %}.</p>
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for vehicle in vehicles %}
+            <div class="bg-[#111827] border border-slate-800 rounded-2xl overflow-hidden shadow-xl hover:border-[#f97316] transition flex flex-col">
+                <div class="relative h-48 bg-slate-900">
+                    <img src="{{ vehicle.image_url or 'https://via.placeholder.com/400x300/1a1a2e/ffffff?text=No+Image' }}"
+                         alt="{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} - breaking for {{ vehicle.fuel }} parts, engine {{ vehicle.engine }}"
+                         class="w-full h-full object-cover"
+                         loading="lazy" decoding="async">
+                    <span class="absolute top-3 right-3 font-black text-xs uppercase px-3 py-1 rounded-md
+                        {%- if vehicle.status == 'In Stock' %} bg-green-500 text-black
+                        {%- elif vehicle.status == 'Sold' %} bg-slate-500 text-black
+                        {%- elif vehicle.status == 'Reserved' %} bg-blue-500 text-black
+                        {%- else %} bg-[#f97316] text-black{% endif %}">
+                        {{ vehicle.status }}
+                    </span>
+                </div>
+                <div class="p-4 flex-1 flex flex-col">
+                    <h3 class="text-lg font-black text-white mb-2">{{ vehicle.title }}</h3>
+                    <div class="grid grid-cols-2 gap-1 text-xs text-slate-400">
+                        <div><span class="text-slate-500">Make:</span> {{ vehicle.make }}</div>
+                        <div><span class="text-slate-500">Model:</span> {{ vehicle.model }}</div>
+                        <div><span class="text-slate-500">Year:</span> {{ vehicle.year }}</div>
+                        <div><span class="text-slate-500">Reg:</span> {{ vehicle.reg }}</div>
+                        <div><span class="text-slate-500">Engine:</span> {{ vehicle.engine }}</div>
+                        <div><span class="text-slate-500">Fuel:</span> {{ vehicle.fuel }}</div>
+                        {% if vehicle.engine_code %}<div><span class="text-slate-500">Engine Code:</span> {{ vehicle.engine_code }}</div>{% endif %}
+                        {% if vehicle.gearbox_code %}<div><span class="text-slate-500">Gearbox Code:</span> {{ vehicle.gearbox_code }}</div>{% endif %}
+                        {% if vehicle.colour %}<div><span class="text-slate-500">Colour:</span> {{ vehicle.colour }}</div>{% endif %}
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <a href="/vehicle/{{ vehicle.id }}" class="flex-1 bg-[#f97316] text-black text-center py-2 rounded-lg text-xs font-bold uppercase hover:bg-orange-500 transition">
+                            Check Parts &amp; Availability
+                        </a>
+                        <a href="https://wa.me/447440369576?text={{ ('Hi, I am interested in vehicle ' ~ vehicle.id) | urlencode }}" target="_blank" rel="noopener" class="flex-1 bg-green-600 text-white text-center py-2 rounded-lg text-xs font-bold uppercase hover:bg-green-700 transition flex items-center justify-center gap-1">
+                            <i class="fa-brands fa-whatsapp"></i> Enquire
+                        </a>
+                    </div>
+
+                    {% if session.get('logged_in') %}
+                    <div class="flex space-x-2 mt-2 pt-2 border-t border-slate-700">
+                        <a href="/edit/{{ vehicle.id }}" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition">
+                            Edit
+                        </a>
+                        <form action="/delete/{{ vehicle.id }}" method="POST" onsubmit="return confirm('⚠️ Delete this vehicle?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

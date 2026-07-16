@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Contact - Cherrywood Auto Parts{% endblock %}
+{% block meta_description %}
+<meta name="description" content="Contact Cherrywood Auto Parts in Bordesley Green, Birmingham. Call, WhatsApp, or visit us for quality used Audi, VW, SEAT and Škoda parts.">
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-4xl mx-auto px-4 py-12 w-full">
+        <h1 class="text-3xl font-black text-white mb-2 flex items-center gap-3">
+            <i class="fa-solid fa-address-card text-[#f97316]"></i> Contact Us
+        </h1>
+        <p class="text-slate-400 text-sm mb-8">Get in touch with our team — we're here to help</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Contact Info -->
+            <div class="bg-[#111827] border border-slate-800 rounded-2xl p-6">
+                <h2 class="text-xl font-black text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-info-circle text-[#f97316]"></i> Contact Details
+                </h2>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold">Phone</p>
+                        <a href="tel:07440369576" class="text-white font-bold hover:text-[#f97316] transition">07440 369576</a>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold">Email</p>
+                        <a href="mailto:cherrywoodparts@outlook.com" class="text-white font-bold hover:text-[#f97316] transition">cherrywoodparts@outlook.com</a>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold">WhatsApp</p>
+                        <a href="https://wa.me/447440369576" target="_blank" rel="noopener" class="text-white font-bold hover:text-[#f97316] transition">07440 369576</a>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold">Address</p>
+                        <p class="text-white font-bold">110-112 Cherrywood Road</p>
+                        <p class="text-white font-bold">Bordesley Green, Birmingham</p>
+                        <p class="text-white font-bold">B9 4UH</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-xs uppercase font-bold">Opening Hours</p>
+                        <p class="text-white">Mon - Fri: 9:00am - 5:00pm</p>
+                        <p class="text-white">Sat: 9:00am - 1:00pm</p>
+                        <p class="text-white">Sun: Closed</p>
+                    </div>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="https://wa.me/447440369576" target="_blank" rel="noopener" class="bg-[#22c55e] text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="tel:07440369576" class="bg-slate-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-600 transition">
+                        <i class="fa-solid fa-phone"></i> Call Now
+                    </a>
+                    <a href="mailto:cherrywoodparts@outlook.com" class="bg-slate-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-600 transition">
+                        <i class="fa-solid fa-envelope"></i> Email
+                    </a>
+                </div>
+            </div>
+
+            <!-- Google Maps -->
+            <div class="bg-[#111827] border border-slate-800 rounded-2xl p-6">
+                <h2 class="text-xl font-black text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-map-pin text-[#f97316]"></i> Find Us
+                </h2>
+                <div class="aspect-video bg-slate-800 rounded-lg overflow-hidden">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2002.8674708450478!2d-1.8565497241199422!3d52.47878623928104!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4870bb0b40bfbbbf%3A0x1512157fd0e4ec22!2s110%20Cherrywood%20Rd%2C%20Birmingham%20B9%204UH%2C%20UK!5e1!3m2!1sen!2sus!4v1781909026863!5m2!1sen!2sus" 
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                <p class="text-xs text-slate-400 mt-3">110-112 Cherrywood Road, Bordesley Green, Birmingham, B9 4UH</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

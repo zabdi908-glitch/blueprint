@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+{% block title %}{{ vehicle.title }} - Cherrywood Auto Parts{% endblock %}
+{% block meta_description %}
+<meta name="description" content="Find used {{ vehicle.title }} parts at Cherrywood Auto Parts. {{ vehicle.make }} {{ vehicle.model }} {{ vehicle.year }} breaking for parts. UK delivery available.">
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-4xl mx-auto px-4 py-12 w-full">
+        <a href="/" class="text-sm text-slate-400 hover:text-white transition inline-block mb-4">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back to Gallery
+        </a>
+
+        {%- set gallery_photos = vehicle.photos if vehicle.photos else ([{'photo_url': vehicle.image_url}] if vehicle.image_url else []) -%}
+        {%- set whatsapp_message -%}
+Hi Cherrywood Auto Parts,
+
+I'm interested in parts from the following vehicle:
+
+Vehicle: {{ vehicle.title }}
+Registration: {{ vehicle.reg or 'N/A' }}
+{%- if vehicle.engine %}
+Engine: {{ vehicle.engine }}
+{%- endif %}
+{%- if vehicle.fuel %}
+Fuel: {{ vehicle.fuel }}
+{%- endif %}
+{%- if vehicle.transmission %}
+Transmission: {{ vehicle.transmission }}
+{%- endif %}
+
+Vehicle link: {{ request.url }}
+
+Could you let me know what parts are available and pricing?
+
+Thank you.
+        {%- endset -%}
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl overflow-hidden">
+            <!-- Image -->
+            <div class="h-96 bg-slate-900">
+                {% if gallery_photos %}
+                <img src="{{ gallery_photos[0].photo_url }}"
+                     alt="{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} - breaking for {{ vehicle.fuel }} parts, engine {{ vehicle.engine }}"
+                     class="w-full h-full object-contain cursor-zoom-in"
+                     loading="lazy" decoding="async"
+                     onclick="openLightbox(0)">
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fa-solid fa-car-side text-6xl text-slate-700 mb-3 block"></i>
+                        <p class="text-slate-500 text-sm">No photo yet</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if gallery_photos|length > 1 %}
+            <!-- Thumbnail strip -->
+            <div class="flex gap-2 overflow-x-auto p-3 bg-[#0f172a] border-t border-slate-800">
+                {% for photo in gallery_photos %}
+                <img src="{{ photo.photo_url }}"
+                     alt="{{ vehicle.title }} photo {{ loop.index }}"
+                     class="h-16 w-24 object-cover rounded-lg border border-slate-700 hover:border-[#f97316] transition cursor-pointer flex-shrink-0"
+                     loading="lazy" decoding="async"
+                     onclick="openLightbox({{ loop.index0 }})">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        {% if gallery_photos %}
+        <!-- Lightbox -->
+        <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="if(event.target===this) closeLightbox()">
+            <button onclick="closeLightbox()" aria-label="Close" class="absolute top-4 right-4 text-white text-3xl w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            {% if gallery_photos|length > 1 %}
+            <button onclick="event.stopPropagation(); prevPhoto()" aria-label="Previous photo" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white text-3xl w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 transition">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button onclick="event.stopPropagation(); nextPhoto()" aria-label="Next photo" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white text-3xl w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 transition">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            {% endif %}
+            <img id="lightbox-img"
+                 src=""
+                 alt="{{ vehicle.title }}"
+                 class="max-w-[92vw] max-h-[88vh] object-contain transition-transform duration-200 cursor-zoom-in select-none"
+                 loading="lazy" decoding="async"
+                 onclick="event.stopPropagation(); toggleZoom(event)">
+        </div>
+        {% endif %}
+
+        {% if vehicle.parts_list %}
+        <!-- Parts Available From This Vehicle -->
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-6 md:p-8 mt-6">
+            <h2 class="text-lg font-black text-white mb-1">
+                <i class="fa-solid fa-gears text-[#f97316] mr-2"></i> Parts Available From This Vehicle
+            </h2>
+            <p class="text-sm text-slate-400 mb-4">Tap any part to enquire — we'll confirm availability and pricing.</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {% for part in vehicle.parts_list %}
+                <a href="https://wa.me/447440369576?text={{ whatsapp_message.strip() | urlencode }}"
+                   target="_blank"
+                   rel="noopener"
+                   class="flex items-center gap-2 bg-[#0f172a] text-slate-300 px-3 py-2.5 rounded-lg text-sm font-medium border border-slate-700 hover:border-[#f97316] hover:text-white transition">
+                    <i class="fa-solid fa-circle-check text-[#f97316] text-xs"></i>
+                    {{ part.strip() }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Details -->
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-6 md:p-8 mt-6">
+                <div class="flex items-start justify-between mb-4">
+                    <h1 class="text-3xl font-black text-white">{{ vehicle.title }}</h1>
+                    <span class="bg-[#f97316] text-black font-black text-xs uppercase px-4 py-2 rounded-full">
+                        {{ vehicle.status }}
+                    </span>
+                </div>
+
+                <!-- Vehicle Specs -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-[#0f172a] rounded-xl">
+                    <div>
+                        <p class="text-xs text-slate-500">Make</p>
+                        <p class="font-bold text-white">{{ vehicle.make }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Model</p>
+                        <p class="font-bold text-white">{{ vehicle.model }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Year</p>
+                        <p class="font-bold text-white">{{ vehicle.year }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Registration</p>
+                        <p class="font-bold text-yellow-400">{{ vehicle.reg or 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Engine</p>
+                        <p class="font-bold text-white">{{ vehicle.engine }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Fuel</p>
+                        <p class="font-bold text-white">{{ vehicle.fuel }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Transmission</p>
+                        <p class="font-bold text-white">{{ vehicle.transmission or 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Mileage</p>
+                        <p class="font-bold text-white">{{ vehicle.mileage or 'N/A' }}</p>
+                    </div>
+                    {% if vehicle.engine_code %}
+                    <div>
+                        <p class="text-xs text-slate-500">Engine Code</p>
+                        <p class="font-bold text-white">{{ vehicle.engine_code }}</p>
+                    </div>
+                    {% endif %}
+                    {% if vehicle.gearbox_code %}
+                    <div>
+                        <p class="text-xs text-slate-500">Gearbox Code</p>
+                        <p class="font-bold text-white">{{ vehicle.gearbox_code }}</p>
+                    </div>
+                    {% endif %}
+                    {% if vehicle.colour %}
+                    <div>
+                        <p class="text-xs text-slate-500">Colour</p>
+                        <p class="font-bold text-white">{{ vehicle.colour }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                {% if vehicle.description %}
+                <div class="mb-8">
+                    <h3 class="text-sm font-black uppercase text-slate-400 tracking-wider mb-3">Description</h3>
+                    <p class="text-slate-300 leading-relaxed">{{ vehicle.description }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-800">
+                    <a href="https://wa.me/447440369576?text={{ whatsapp_message.strip() | urlencode }}" 
+                       target="_blank" 
+                       rel="noopener"
+                       class="flex-1 p-3.5 bg-[#22c55e] text-white font-black uppercase text-sm tracking-wider rounded-xl hover:bg-green-600 transition text-center flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> Enquire on WhatsApp
+                    </a>
+                    <a href="/" class="flex-1 p-3.5 bg-slate-700 text-white font-black uppercase text-sm tracking-wider rounded-xl hover:bg-slate-600 transition text-center">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Back to Gallery
+                    </a>
+                </div>
+            </div>
+    </div>
+
+    {% if gallery_photos %}
+    <script>
+        const galleryPhotos = {{ gallery_photos | map(attribute='photo_url') | list | tojson }};
+        let currentPhotoIndex = 0;
+        let touchStartX = null;
+
+        function renderLightboxImage() {
+            const img = document.getElementById('lightbox-img');
+            img.src = galleryPhotos[currentPhotoIndex];
+            img.classList.remove('scale-[2.2]');
+            img.style.transformOrigin = 'center center';
+        }
+
+        function openLightbox(index) {
+            currentPhotoIndex = index;
+            renderLightboxImage();
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('hidden');
+            lightbox.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('hidden');
+            lightbox.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        function nextPhoto() {
+            currentPhotoIndex = (currentPhotoIndex + 1) % galleryPhotos.length;
+            renderLightboxImage();
+        }
+
+        function prevPhoto() {
+            currentPhotoIndex = (currentPhotoIndex - 1 + galleryPhotos.length) % galleryPhotos.length;
+            renderLightboxImage();
+        }
+
+        function toggleZoom(e) {
+            const img = document.getElementById('lightbox-img');
+            if (img.classList.contains('scale-[2.2]')) {
+                img.classList.remove('scale-[2.2]');
+            } else {
+                const rect = img.getBoundingClientRect();
+                const originX = ((e.clientX - rect.left) / rect.width) * 100;
+                const originY = ((e.clientY - rect.top) / rect.height) * 100;
+                img.style.transformOrigin = `${originX}% ${originY}%`;
+                img.classList.add('scale-[2.2]');
+            }
+        }
+
+        document.addEventListener('keydown', function (e) {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('hidden')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') nextPhoto();
+            if (e.key === 'ArrowLeft') prevPhoto();
+        });
+
+        const lightboxEl = document.getElementById('lightbox');
+        lightboxEl.addEventListener('touchstart', function (e) {
+            touchStartX = e.changedTouches[0].clientX;
+        });
+        lightboxEl.addEventListener('touchend', function (e) {
+            if (touchStartX === null) return;
+            const deltaX = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(deltaX) > 50) {
+                if (deltaX < 0) nextPhoto();
+                else prevPhoto();
+            }
+            touchStartX = null;
+        });
+    </script>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Part - Cherrywood Auto Parts{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12 w-full">
+    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-8">
+        <h1 class="text-3xl font-black text-white mb-2 flex items-center gap-3">
+            <i class="fa-solid fa-pen-to-square text-[#f97316]"></i> Edit Part
+        </h1>
+        <p class="text-slate-400 text-sm mb-6">Update the details for <span class="text-white font-bold">{{ part.part_name }}</span></p>
+
+        <form method="POST" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Stock ID *</label>
+                    <input type="text" name="stock_id" value="{{ part.stock_id }}" required
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Part Name *</label>
+                    <input type="text" name="part_name" value="{{ part.part_name }}" required
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Category *</label>
+                    <select name="category" required class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                        <option value="Engine" {% if part.category == 'Engine' %}selected{% endif %}>Engine</option>
+                        <option value="Gearbox" {% if part.category == 'Gearbox' %}selected{% endif %}>Gearbox</option>
+                        <option value="Body Panel" {% if part.category == 'Body Panel' %}selected{% endif %}>Body Panel</option>
+                        <option value="Electronics" {% if part.category == 'Electronics' %}selected{% endif %}>Electronics</option>
+                        <option value="Interior" {% if part.category == 'Interior' %}selected{% endif %}>Interior</option>
+                        <option value="Wheels" {% if part.category == 'Wheels' %}selected{% endif %}>Wheels</option>
+                        <option value="Lighting" {% if part.category == 'Lighting' %}selected{% endif %}>Lighting</option>
+                        <option value="Suspension" {% if part.category == 'Suspension' %}selected{% endif %}>Suspension</option>
+                        <option value="Brakes" {% if part.category == 'Brakes' %}selected{% endif %}>Brakes</option>
+                        <option value="Exhaust" {% if part.category == 'Exhaust' %}selected{% endif %}>Exhaust</option>
+                        <option value="Other" {% if part.category == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Part Type</label>
+                    <input type="text" name="part_type" value="{{ part.part_type or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Make</label>
+                    <input type="text" name="make" value="{{ part.make or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Model</label>
+                    <input type="text" name="model" value="{{ part.model or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Generation</label>
+                    <input type="text" name="generation" value="{{ part.generation or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">OEM / Part Number</label>
+                    <input type="text" name="oem_number" value="{{ part.oem_number or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Engine Code</label>
+                    <input type="text" name="engine_code" value="{{ part.engine_code or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Condition</label>
+                    <select name="condition" class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                        <option value="Good" {% if part.condition == 'Good' %}selected{% endif %}>Good</option>
+                        <option value="Tested" {% if part.condition == 'Tested' %}selected{% endif %}>Tested</option>
+                        <option value="New" {% if part.condition == 'New' %}selected{% endif %}>New</option>
+                        <option value="Refurbished" {% if part.condition == 'Refurbished' %}selected{% endif %}>Refurbished</option>
+                        <option value="As Is" {% if part.condition == 'As Is' %}selected{% endif %}>As Is</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Price (£)</label>
+                    <input type="number" name="price" step="0.01" value="{{ part.price }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Stock Status</label>
+                    <select name="stock_status" class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                        <option value="Available" {% if part.stock_status == 'Available' %}selected{% endif %}>Available</option>
+                        <option value="Reserved" {% if part.stock_status == 'Reserved' %}selected{% endif %}>Reserved</option>
+                        <option value="Sold" {% if part.stock_status == 'Sold' %}selected{% endif %}>Sold</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Location</label>
+                    <input type="text" name="location" value="{{ part.location or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-black uppercase text-slate-400 mb-1">Notes</label>
+                <textarea name="notes" rows="2" class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">{{ part.notes or '' }}</textarea>
+            </div>
+
+            <!-- ===== VEHICLE SPECIFICATIONS ===== -->
+            <div class="pt-4 mt-2 border-t border-slate-700">
+                <h3 class="text-sm font-black uppercase text-[#f97316] tracking-wider mb-4">Donor Vehicle Details</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Registration</label>
+                    <input type="text" name="registration" value="{{ part.registration or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none uppercase">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">
+                        VIN <span class="text-slate-500 font-normal lowercase">(shown masked to public)</span>
+                    </label>
+                    <input type="text" name="vin" value="{{ part.vin or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none uppercase">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Year</label>
+                    <input type="number" name="year" value="{{ part.year or '' }}" min="1980" max="2030"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Mileage</label>
+                    <input type="number" name="mileage" value="{{ part.mileage or '' }}" min="0"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Fuel Type</label>
+                    <select name="fuel_type" class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                        <option value="">-- Not specified --</option>
+                        <option value="Petrol" {% if part.fuel_type == 'Petrol' %}selected{% endif %}>Petrol</option>
+                        <option value="Diesel" {% if part.fuel_type == 'Diesel' %}selected{% endif %}>Diesel</option>
+                        <option value="Hybrid" {% if part.fuel_type == 'Hybrid' %}selected{% endif %}>Hybrid</option>
+                        <option value="Electric" {% if part.fuel_type == 'Electric' %}selected{% endif %}>Electric</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Transmission</label>
+                    <select name="transmission" class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                        <option value="">-- Not specified --</option>
+                        <option value="Manual" {% if part.transmission == 'Manual' %}selected{% endif %}>Manual</option>
+                        <option value="Automatic" {% if part.transmission == 'Automatic' %}selected{% endif %}>Automatic</option>
+                        <option value="DSG" {% if part.transmission == 'DSG' %}selected{% endif %}>DSG</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Engine Size</label>
+                    <input type="text" name="engine_size" value="{{ part.engine_size or '' }}" placeholder="e.g. 2.0"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">Colour</label>
+                    <input type="text" name="colour" value="{{ part.colour or '' }}"
+                           class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">
+                        Side <span class="text-slate-500 font-normal lowercase">(if applicable)</span>
+                    </label>
+                    <select name="side" class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                        <option value="">-- N/A --</option>
+                        <option value="Left (N/S)" {% if part.side == 'Left (N/S)' %}selected{% endif %}>Left (N/S)</option>
+                        <option value="Right (O/S)" {% if part.side == 'Right (O/S)' %}selected{% endif %}>Right (O/S)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-400 mb-1">
+                        Position <span class="text-slate-500 font-normal lowercase">(if applicable)</span>
+                    </label>
+                    <select name="position" class="w-full p-3 bg-[#0f172a] border border-slate-700 rounded-lg text-white focus:border-[#f97316] outline-none">
+                        <option value="">-- N/A --</option>
+                        <option value="Front" {% if part.position == 'Front' %}selected{% endif %}>Front</option>
+                        <option value="Rear" {% if part.position == 'Rear' %}selected{% endif %}>Rear</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full p-4 bg-[#f97316] text-black font-black uppercase rounded-xl hover:bg-orange-500 transition">
+                Update Part
+            </button>
+        </form>
+
+        <!-- ===== PHOTO MANAGEMENT ===== -->
+        <!-- Deliberately OUTSIDE the main edit form above — this section has
+             its own forms (upload, delete, reorder), and nesting them inside
+             the main form would cause the same broken-submission bug fixed
+             earlier on the Parts Inventory bulk-delete page. -->
+        <div class="mt-6 border-t border-slate-700 pt-6">
+            <h4 class="text-lg font-bold text-white mb-4">Photos</h4>
+
+            <!-- Existing photos — filtered to photo_order < 100, since anything
+                 at 100+ is an auto-generated thumbnail, not something managed
+                 directly here. -->
+            <div class="flex flex-wrap gap-4 mb-4">
+                {% for photo in part.photos if photo.photo_order < 100 %}
+                <div class="relative group">
+                    <img src="{{ photo.photo_url }}" class="w-24 h-24 object-cover rounded border border-slate-700" loading="lazy" decoding="async">
+
+                    <form action="/parts/delete-photo/{{ photo.id }}" method="POST" class="absolute top-1 right-1"
+                          onsubmit="return confirm('Delete this photo?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700">✕</button>
+                    </form>
+
+                    <div class="absolute bottom-1 left-1 flex gap-1">
+                        <form action="/parts/reorder-photo/{{ photo.id }}/up" method="POST" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="bg-slate-800/90 text-white text-xs w-6 h-6 rounded hover:bg-slate-700" aria-label="Move photo earlier">↑</button>
+                        </form>
+                        <form action="/parts/reorder-photo/{{ photo.id }}/down" method="POST" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="bg-slate-800/90 text-white text-xs w-6 h-6 rounded hover:bg-slate-700" aria-label="Move photo later">↓</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-slate-500 text-sm">No photos yet — add one below.</p>
+                {% endfor %}
+            </div>
+
+            <form action="/parts/upload-photo/{{ part.id }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="flex gap-2">
+                    <input type="file" name="photos" multiple accept="image/*,.heic,.heif" class="bg-slate-800 text-slate-300 p-2 rounded border border-slate-700">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Upload</button>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">JPG, PNG, WebP, or HEIC (iPhone) — max 5MB each, up to 10 at once</p>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
